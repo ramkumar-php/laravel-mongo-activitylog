@@ -5,15 +5,15 @@ use Spatie\Activitylog\Test\Models\Activity;
 use Spatie\Activitylog\Test\Models\AnotherInvalidActivity;
 use Spatie\Activitylog\Test\Models\InvalidActivity;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->activityDescription = 'My activity';
-    collect(range(1, 5))->each(function (int $index) {
+    collect(range(1, 5))->each(function (int $index): void {
         $logName = "log{$index}";
         activity($logName)->log('hello everybody');
     });
 });
 
-it('can log activity using a custom model', function () {
+it('can log activity using a custom model', function (): void {
     app()['config']->set('activitylog.activity_model', Activity::class);
 
     $activity = activity()->log($this->activityDescription);
@@ -23,7 +23,7 @@ it('can log activity using a custom model', function () {
     expect($activity)->toBeInstanceOf(Activity::class);
 });
 
-it('does not throw an exception when model config is null', function () {
+it('does not throw an exception when model config is null', function (): void {
     app()['config']->set('activitylog.activity_model', null);
 
     activity()->log($this->activityDescription);
@@ -31,7 +31,7 @@ it('does not throw an exception when model config is null', function () {
     $this->markTestAsPassed();
 });
 
-it('throws an exception when model doesnt implements activity', function () {
+it('throws an exception when model doesnt implements activity', function (): void {
     app()['config']->set('activitylog.activity_model', InvalidActivity::class);
 
     $this->expectException(InvalidConfiguration::class);
@@ -39,7 +39,7 @@ it('throws an exception when model doesnt implements activity', function () {
     activity()->log($this->activityDescription);
 });
 
-it('throws an exception when model doesnt extend model', function () {
+it('throws an exception when model doesnt extend model', function (): void {
     app()['config']->set('activitylog.activity_model', AnotherInvalidActivity::class);
 
     $this->expectException(InvalidConfiguration::class);
@@ -47,7 +47,7 @@ it('throws an exception when model doesnt extend model', function () {
     activity()->log($this->activityDescription);
 });
 
-it('doesnt conlict with laravel change tracking', function () {
+it('doesnt conlict with laravel change tracking', function (): void {
     app()['config']->set('activitylog.activity_model', Activity::class);
 
     $properties = [

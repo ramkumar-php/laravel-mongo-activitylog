@@ -2,7 +2,7 @@
 
 namespace Spatie\Activitylog;
 
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Contracts\Activity;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 use Spatie\Activitylog\Exceptions\InvalidConfiguration;
@@ -15,17 +15,17 @@ class ActivitylogServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package
-        ->name('laravel-activitylog')
-        ->hasConfigFile('activitylog')
-        ->hasMigrations([
-            'create_activity_log_table',
-            'add_event_column_to_activity_log_table',
-            'add_batch_uuid_column_to_activity_log_table',
-        ])
-        ->hasCommand(CleanActivitylogCommand::class);
+            ->name('laravel-activitylog')
+            ->hasConfigFile('activitylog')
+            ->hasMigrations([
+                'create_activity_log_table',
+                'add_event_column_to_activity_log_table',
+                'add_batch_uuid_column_to_activity_log_table',
+            ])
+            ->hasCommand(CleanActivitylogCommand::class);
     }
 
-    public function registeringPackage()
+    public function registeringPackage(): void
     {
         $this->app->bind(ActivityLogger::class);
 

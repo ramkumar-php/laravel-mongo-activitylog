@@ -5,7 +5,7 @@ namespace Spatie\Activitylog;
 use Closure;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Config\Repository;
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Exceptions\CouldNotLogActivity;
 
 class CauserResolver
@@ -62,7 +62,7 @@ class CauserResolver
             return $subject;
         }
 
-        if (is_null($subject)) {
+        if (null === $subject) {
             return $this->getDefaultCauser();
         }
 
@@ -91,7 +91,7 @@ class CauserResolver
 
     protected function isResolvable(mixed $model): bool
     {
-        return $model instanceof Model || is_null($model);
+        return $model instanceof Model || null === $model;
     }
 
     protected function getDefaultCauser(): ?Model

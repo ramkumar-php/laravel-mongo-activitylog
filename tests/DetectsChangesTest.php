@@ -14,21 +14,21 @@ use Spatie\Activitylog\Test\Models\Article;
 use Spatie\Activitylog\Test\Models\User;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-beforeEach(function () {
-    $this->article = new class() extends Article {
+beforeEach(function (): void {
+    $this->article = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text']);
+                ->logOnly(['name', 'text']);
         }
     };
 
     $this->assertCount(0, Activity::all());
 });
 
-it('can store the values when creating a model', function () {
+it('can store the values when creating a model', function (): void {
     $this->createArticle();
 
     $expectedChanges = [
@@ -41,8 +41,8 @@ it('can store the values when creating a model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('deep diff check json field', function () {
-    $articleClass = new class() extends Article {
+it('deep diff check json field', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -52,13 +52,13 @@ it('deep diff check json field', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->dontSubmitEmptyLogs()
-            ->logOnlyDirty()
-            ->logOnly(['json->phone', 'json->details', 'json->address']);
+                ->dontSubmitEmptyLogs()
+                ->logOnlyDirty()
+                ->logOnly(['json->phone', 'json->details', 'json->address']);
         }
     };
 
-    $articleClass::addLogChange(new class() implements LoggablePipe {
+    $articleClass::addLogChange(new class () implements LoggablePipe {
         public function handle(EventLogBag $event, Closure $next): EventLogBag
         {
             if ($event->event === 'updated') {
@@ -75,8 +75,8 @@ it('deep diff check json field', function () {
                 );
 
                 $event->changes['old']['json'] = collect($event->changes['old']['json'])
-                ->only(array_keys($event->changes['attributes']['json']))
-                ->all();
+                    ->only(array_keys($event->changes['attributes']['json']))
+                    ->all();
             }
 
             return $next($event);
@@ -86,7 +86,7 @@ it('deep diff check json field', function () {
     $article = $articleClass::create([
         'name' => 'Hamburg',
         'json' => ['details' => '', 'phone' => '1231231234', 'address' => 'new address'],
-      ]);
+    ]);
 
     $article->update(['json' => ['details' => 'new details']]);
 
@@ -106,8 +106,8 @@ it('deep diff check json field', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('detect changes for date inteval attributes', function () {
-    $articleClass = new class() extends Article {
+it('detect changes for date inteval attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -117,15 +117,15 @@ it('detect changes for date inteval attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'interval'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'interval'])
+                ->logOnlyDirty();
         }
     };
 
     $article = $articleClass::create([
         'name' => 'Hamburg',
         'interval' => CarbonInterval::minute(),
-      ]);
+    ]);
 
     $article->update(['name' => 'New name', 'interval' => CarbonInterval::month()]);
 
@@ -144,13 +144,13 @@ it('detect changes for date inteval attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('detect changes for null date inteval attributes', function () {
-    $articleClass = new class() extends Article {
+it('detect changes for null date inteval attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
-                'interval' => IntervalCasts::class,
-            ];
+            'interval' => IntervalCasts::class,
+        ];
 
         public function getActivitylogOptions(): LogOptions
         {
@@ -162,52 +162,52 @@ it('detect changes for null date inteval attributes', function () {
     };
 
     $nullIntevalArticle = $articleClass::create([
-            'name' => 'Hamburg',
-          ]);
+        'name' => 'Hamburg',
+    ]);
 
     $nullIntevalArticle->update(['name' => 'New name', 'interval' => CarbonInterval::month()]);
 
     $expectedChangesForNullInterval = [
-            'attributes' => [
-                'name' => 'New name',
-                'interval' => '1 month',
-            ],
-            'old' => [
-                'name' => 'Hamburg',
-                'interval' => null,
-            ],
-        ];
+        'attributes' => [
+            'name' => 'New name',
+            'interval' => '1 month',
+        ],
+        'old' => [
+            'name' => 'Hamburg',
+            'interval' => null,
+        ],
+    ];
     $this->assertEquals($expectedChangesForNullInterval, $this->getLastActivity()->changes()->toArray());
 
     $intervalArticle = $articleClass::create([
         'name' => 'Hamburg',
         'interval' => CarbonInterval::month(),
-      ]);
+    ]);
 
     $intervalArticle->update(['name' => 'New name', 'interval' => null]);
 
     $expectedChangesForInterval = [
-            'attributes' => [
-                'name' => 'New name',
-                'interval' => null,
-            ],
-            'old' => [
-                'name' => 'Hamburg',
-                'interval' => '1 month',
-            ],
-        ];
+        'attributes' => [
+            'name' => 'New name',
+            'interval' => null,
+        ],
+        'old' => [
+            'name' => 'Hamburg',
+            'interval' => '1 month',
+        ],
+    ];
 
     $this->assertEquals($expectedChangesForInterval, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the relation values when creating a model', function () {
-    $articleClass = new class() extends Article {
+it('can store the relation values when creating a model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.name']);
+                ->logOnly(['name', 'text', 'user.name']);
         }
     };
 
@@ -241,8 +241,8 @@ it('can store the relation values when creating a model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('retruns same uuid for all log changes under one batch', function () {
-    $articleClass = new class() extends Article {
+it('retruns same uuid for all log changes under one batch', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         use SoftDeletes;
 
@@ -256,14 +256,14 @@ it('retruns same uuid for all log changes under one batch', function () {
     app(LogBatch::class)->startBatch();
 
     $user = User::create([
-            'name' => 'user name',
-        ]);
+        'name' => 'user name',
+    ]);
 
     $article = $articleClass::create([
-            'name' => 'original name',
-            'text' => 'original text',
-            'user_id' => $user->id,
-        ]);
+        'name' => 'original name',
+        'text' => 'original text',
+        'user_id' => $user->id,
+    ]);
 
     $article->name = 'updated name';
     $article->text = 'updated text';
@@ -279,15 +279,15 @@ it('retruns same uuid for all log changes under one batch', function () {
     $this->assertTrue(Activity::pluck('batch_uuid')->every(fn ($uuid) => $uuid === $batchUuid));
 });
 
-it('assigns new uuid for multiple change logs in different batches', function () {
-    $articleClass = new class() extends Article {
+it('assigns new uuid for multiple change logs in different batches', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         use SoftDeletes;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-                  ->logOnly(['name', 'text']);
+                ->logOnly(['name', 'text']);
         }
     };
 
@@ -295,14 +295,14 @@ it('assigns new uuid for multiple change logs in different batches', function ()
 
     $uuidForCreatedEvent = app(LogBatch::class)->getUuid();
     $user = User::create([
-              'name' => 'user name',
-          ]);
+        'name' => 'user name',
+    ]);
 
     $article = $articleClass::create([
-              'name' => 'original name',
-              'text' => 'original text',
-              'user_id' => $user->id,
-          ]);
+        'name' => 'original name',
+        'text' => 'original text',
+        'user_id' => $user->id,
+    ]);
 
     app(LogBatch::class)->endBatch();
 
@@ -334,14 +334,14 @@ it('assigns new uuid for multiple change logs in different batches', function ()
     $this->assertNotSame($uuidForCreatedEvent, $uuidForDeletedEvents);
 });
 
-it('can removes key event if it was loggable', function () {
-    $articleClass = new class() extends Article {
+it('can removes key event if it was loggable', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.name']);
+                ->logOnly(['name', 'text', 'user.name']);
         }
     };
 
@@ -349,7 +349,7 @@ it('can removes key event if it was loggable', function () {
         'name' => 'user name',
     ]);
 
-    $articleClass::addLogChange(new class() implements LoggablePipe {
+    $articleClass::addLogChange(new class () implements LoggablePipe {
         public function handle(EventLogBag $event, Closure $next): EventLogBag
         {
             Arr::forget($event->changes, ['attributes.name', 'old.name']);
@@ -382,14 +382,14 @@ it('can removes key event if it was loggable', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store empty relation when creating a model', function () {
-    $articleClass = new class() extends Article {
+it('can store empty relation when creating a model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.name']);
+                ->logOnly(['name', 'text', 'user.name']);
         }
     };
 
@@ -422,7 +422,7 @@ it('can store empty relation when creating a model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when updating a model', function () {
+it('can store the changes when updating a model', function (): void {
     $article = $this->createArticle();
 
     $article->name = 'updated name';
@@ -444,7 +444,7 @@ it('can store the changes when updating a model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store dirty changes only', function () {
+it('can store dirty changes only', function (): void {
     $article = createDirtyArticle();
 
     $article->name = 'updated name';
@@ -463,7 +463,7 @@ it('can store dirty changes only', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store dirty changes for swapping values', function () {
+it('can store dirty changes for swapping values', function (): void {
     $article = createDirtyArticle();
 
     $originalName = $article->name;
@@ -488,14 +488,14 @@ it('can store dirty changes for swapping values', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when updating a related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when updating a related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.name']);
+                ->logOnly(['name', 'text', 'user.name']);
         }
     };
 
@@ -531,14 +531,14 @@ it('can store the changes when updating a related model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when updating a snake case related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when updating a snake case related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'snakeUser.name']);
+                ->logOnly(['name', 'text', 'snakeUser.name']);
         }
 
         public function snake_user()
@@ -579,14 +579,14 @@ it('can store the changes when updating a snake case related model', function ()
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when updating a camel case related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when updating a camel case related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'camel_user.name']);
+                ->logOnly(['name', 'text', 'camel_user.name']);
         }
 
         public function camelUser()
@@ -627,14 +627,14 @@ it('can store the changes when updating a camel case related model', function ()
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when updating a custom case related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when updating a custom case related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'Custom_Case_User.name']);
+                ->logOnly(['name', 'text', 'Custom_Case_User.name']);
         }
 
         public function Custom_Case_User()
@@ -675,15 +675,15 @@ it('can store the changes when updating a custom case related model', function (
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the dirty changes when updating a related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the dirty changes when updating a related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.name'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'text', 'user.name'])
+                ->logOnlyDirty();
         }
     };
 
@@ -715,15 +715,15 @@ it('can store the dirty changes when updating a related model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when saving including multi level related model', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when saving including multi level related model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'user.latest_article.name'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'text', 'user.latest_article.name'])
+                ->logOnlyDirty();
         }
     };
 
@@ -754,14 +754,14 @@ it('can store the changes when saving including multi level related model', func
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('will store no changes when not logging attributes', function () {
-    $articleClass = new class() extends Article {
+it('will store no changes when not logging attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly([]);
+                ->logOnly([]);
         }
     };
 
@@ -774,7 +774,7 @@ it('will store no changes when not logging attributes', function () {
     $this->assertEquals(collect(), $this->getLastActivity()->changes());
 });
 
-it('will store the values when deleting the model', function () {
+it('will store the values when deleting the model', function (): void {
     $article = $this->createArticle();
 
     $article->delete();
@@ -790,15 +790,15 @@ it('will store the values when deleting the model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes());
 });
 
-it('will store the values when deleting the model with softdeletes', function () {
-    $articleClass = new class() extends Article {
+it('will store the values when deleting the model with softdeletes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         use SoftDeletes;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text']);
+                ->logOnly(['name', 'text']);
         }
     };
 
@@ -834,16 +834,16 @@ it('will store the values when deleting the model with softdeletes', function ()
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes());
 });
 
-it('can store the changes of collection casted properties', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes of collection casted properties', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         protected $casts = ['json' => 'collection'];
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['json'])
-            ->logOnlyDirty();
+                ->logOnly(['json'])
+                ->logOnlyDirty();
         }
     };
 
@@ -869,16 +869,16 @@ it('can store the changes of collection casted properties', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes of array casted properties', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes of array casted properties', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         protected $casts = ['json' => 'array'];
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['json'])
-            ->logOnlyDirty();
+                ->logOnly(['json'])
+                ->logOnlyDirty();
         }
     };
 
@@ -904,16 +904,16 @@ it('can store the changes of array casted properties', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes of json casted properties', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes of json casted properties', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
         protected $casts = ['json' => 'json'];
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['json'])
-            ->logOnlyDirty();
+                ->logOnly(['json'])
+                ->logOnlyDirty();
         }
     };
 
@@ -939,8 +939,8 @@ it('can store the changes of json casted properties', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use nothing as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use nothing as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -948,7 +948,7 @@ it('can use nothing as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->dontLogFillable();
+                ->dontLogFillable();
         }
     };
 
@@ -962,8 +962,8 @@ it('can use nothing as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use text as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use text as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -971,8 +971,8 @@ it('can use text as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['text'])
-            ->dontLogFillable();
+                ->logOnly(['text'])
+                ->dontLogFillable();
         }
     };
 
@@ -990,8 +990,8 @@ it('can use text as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use fillable as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use fillable as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -999,7 +999,7 @@ it('can use fillable as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logFillable();
+                ->logFillable();
         }
     };
 
@@ -1017,8 +1017,8 @@ it('can use fillable as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use both fillable and log attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use both fillable and log attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $fillable = ['name'];
@@ -1026,8 +1026,8 @@ it('can use both fillable and log attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['text'])
-            ->logFillable();
+                ->logOnly(['text'])
+                ->logFillable();
         }
     };
 
@@ -1046,14 +1046,14 @@ it('can use both fillable and log attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use wildcard for loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use wildcard for loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
     };
 
@@ -1082,14 +1082,14 @@ it('can use wildcard for loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use wildcard with relation', function () {
-    $articleClass = new class() extends Article {
+it('can use wildcard with relation', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['*', 'user.name']);
+                ->logOnly(['*', 'user.name']);
         }
     };
 
@@ -1125,15 +1125,15 @@ it('can use wildcard with relation', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use wildcard when updating model', function () {
-    $articleClass = new class() extends Article {
+it('can use wildcard when updating model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty();
+                ->logAll()
+                ->logOnlyDirty();
         }
     };
 
@@ -1166,8 +1166,8 @@ it('can use wildcard when updating model', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes when a boolean field is changed from false to null', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes when a boolean field is changed from false to null', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1177,8 +1177,8 @@ it('can store the changes when a boolean field is changed from false to null', f
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty();
+                ->logAll()
+                ->logOnlyDirty();
         }
     };
 
@@ -1212,15 +1212,15 @@ it('can store the changes when a boolean field is changed from false to null', f
     $this->assertSame($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use ignored attributes while updating', function () {
-    $articleClass = new class() extends Article {
+it('can use ignored attributes while updating', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll()
-            ->logExcept(['name', 'updated_at']);
+                ->logAll()
+                ->logExcept(['name', 'updated_at']);
         }
     };
 
@@ -1247,8 +1247,8 @@ it('can use ignored attributes while updating', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use unguarded as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use unguarded as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $guarded = ['text', 'json'];
@@ -1256,8 +1256,8 @@ it('can use unguarded as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logUnguarded()
-            ->logExcept(['id', 'created_at', 'updated_at', 'deleted_at']);
+                ->logUnguarded()
+                ->logExcept(['id', 'created_at', 'updated_at', 'deleted_at']);
         }
     };
 
@@ -1279,8 +1279,8 @@ it('can use unguarded as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('will store no changes when wildcard guard and log unguarded attributes', function () {
-    $articleClass = new class() extends Article {
+it('will store no changes when wildcard guard and log unguarded attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $guarded = ['*'];
@@ -1288,7 +1288,7 @@ it('will store no changes when wildcard guard and log unguarded attributes', fun
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logUnguarded();
+                ->logUnguarded();
         }
     };
 
@@ -1300,8 +1300,8 @@ it('will store no changes when wildcard guard and log unguarded attributes', fun
     $this->assertEquals([], $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use hidden as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use hidden as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $hidden = ['text'];
@@ -1310,7 +1310,7 @@ it('can use hidden as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text']);
+                ->logOnly(['name', 'text']);
         }
     };
 
@@ -1329,8 +1329,8 @@ it('can use hidden as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use overloaded as loggable attributes', function () {
-    $articleClass = new class() extends Article {
+it('can use overloaded as loggable attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1338,10 +1338,10 @@ it('can use overloaded as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'description']);
+                ->logOnly(['name', 'text', 'description']);
         }
 
-        public function setDescriptionAttribute($value)
+        public function setDescriptionAttribute($value): void
         {
             $this->attributes['json'] = json_encode(['description' => $value]);
         }
@@ -1369,8 +1369,8 @@ it('can use overloaded as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use mutated as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use mutated as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1378,12 +1378,12 @@ it('can use mutated as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
 
-        public function setNameAttribute($value)
+        public function setNameAttribute($value): void
         {
-            $this->attributes['name'] = strtoupper($value);
+            $this->attributes['name'] = mb_strtoupper($value);
         }
     };
 
@@ -1431,8 +1431,8 @@ it('can use mutated as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use accessor as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use accessor as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1440,12 +1440,12 @@ it('can use accessor as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
 
         public function getNameAttribute($value)
         {
-            return strtoupper($value);
+            return mb_strtoupper($value);
         }
     };
 
@@ -1493,8 +1493,8 @@ it('can use accessor as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use encrypted as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use encrypted as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1503,7 +1503,7 @@ it('can use encrypted as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text']);
+                ->logOnly(['name', 'text']);
         }
 
         public function getAttributeValue($key)
@@ -1559,8 +1559,8 @@ it('can use encrypted as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use casted as loggable attribute', function () {
-    $articleClass = new class() extends Article {
+it('can use casted as loggable attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1570,8 +1570,8 @@ it('can use casted as loggable attribute', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text', 'price'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'text', 'price'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1610,8 +1610,8 @@ it('can use casted as loggable attribute', function () {
     $this->assertIsFloat($changes['attributes']['price']);
 });
 
-it('can use nullable date as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use nullable date as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
         use SoftDeletes;
 
@@ -1626,7 +1626,7 @@ it('can use nullable date as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
     };
 
@@ -1650,8 +1650,8 @@ it('can use nullable date as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use custom date cast as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use custom date cast as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1662,7 +1662,7 @@ it('can use custom date cast as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
     };
 
@@ -1686,8 +1686,8 @@ it('can use custom date cast as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can use custom immutable date cast as loggable attributes', function () {
-    $userClass = new class() extends User {
+it('can use custom immutable date cast as loggable attributes', function (): void {
+    $userClass = new class () extends User {
         use LogsActivity;
 
         protected $fillable = ['name', 'text'];
@@ -1698,7 +1698,7 @@ it('can use custom immutable date cast as loggable attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logAll();
+                ->logAll();
         }
     };
 
@@ -1722,8 +1722,8 @@ it('can use custom immutable date cast as loggable attributes', function () {
     $this->assertEquals($expectedChanges, $this->getLastActivity()->changes()->toArray());
 });
 
-it('can store the changes of json attributes', function () {
-    $articleClass = new class() extends Article {
+it('can store the changes of json attributes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1733,8 +1733,8 @@ it('can store the changes of json attributes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'json->data'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'json->data'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1757,8 +1757,8 @@ it('can store the changes of json attributes', function () {
     $this->assertSame($expectedChanges, $changes);
 });
 
-it('will not store changes to untracked json', function () {
-    $articleClass = new class() extends Article {
+it('will not store changes to untracked json', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1768,8 +1768,8 @@ it('will not store changes to untracked json', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'json->data'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'json->data'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1796,8 +1796,8 @@ it('will not store changes to untracked json', function () {
     $this->assertSame($expectedChanges, $changes);
 });
 
-it('will return null for missing json attribute', function () {
-    $articleClass = new class() extends Article {
+it('will return null for missing json attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1807,8 +1807,8 @@ it('will return null for missing json attribute', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'json->data->missing'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'json->data->missing'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1846,8 +1846,8 @@ it('will return null for missing json attribute', function () {
     $this->assertSame($expectedChanges, $changes);
 });
 
-it('will return an array for sub key in json attribute', function () {
-    $articleClass = new class() extends Article {
+it('will return an array for sub key in json attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1857,8 +1857,8 @@ it('will return an array for sub key in json attribute', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'json->data'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'json->data'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1912,8 +1912,8 @@ it('will return an array for sub key in json attribute', function () {
     $this->assertSame($expectedChanges, $changes);
 });
 
-it('will access further than level one json attribute', function () {
-    $articleClass = new class() extends Article {
+it('will access further than level one json attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -1923,8 +1923,8 @@ it('will access further than level one json attribute', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'json->data->can->go->how->far'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'json->data->can->go->how->far'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1977,14 +1977,14 @@ it('will access further than level one json attribute', function () {
 
 function createDirtyArticle(): Article
 {
-    $articleClass = new class() extends Article {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['name', 'text'])
-            ->logOnlyDirty();
+                ->logOnly(['name', 'text'])
+                ->logOnlyDirty();
         }
     };
 
@@ -1998,6 +1998,6 @@ function createDirtyArticle(): Article
 function getActivitylogOptions(): LogOptions
 {
     return LogOptions::defaults()
-    ->logOnly(['name', 'text'])
-    ->logOnlyDirty();
+        ->logOnly(['name', 'text'])
+        ->logOnlyDirty();
 }

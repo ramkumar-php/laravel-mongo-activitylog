@@ -10,8 +10,10 @@
 [![Check & fix styling](https://github.com/spatie/laravel-activitylog/workflows/Check%20&%20fix%20styling/badge.svg)](https://github.com/spatie/laravel-activitylog/actions/workflows/php-cs-fixer.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-activitylog.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-activitylog)
 
-The `spatie/laravel-activitylog` package provides easy to use functions to log the activities of the users of your app. It can also automatically log model events.
+The `ramkumar-php/laravel-mongo-activitylog` package provides easy to use functions to log the activities of the users of your app. It can also automatically log model events. 
 The Package stores all activity in the `activity_log` table.
+
+It is inspired from laravel-activitylog. Same code same everything but it is compatible with [laravel-mongodb](https://github.com/jenssegers/laravel-mongodb)
 
 Here's a demo of how you can use it:
 

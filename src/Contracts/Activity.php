@@ -2,9 +2,9 @@
 
 namespace Spatie\Activitylog\Contracts;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Jenssegers\Mongodb\Eloquent\Builder;
+use Jenssegers\Mongodb\Eloquent\Model;
+use Jenssegers\Mongodb\Relations\MorphTo;
 use Illuminate\Support\Collection;
 
 interface Activity

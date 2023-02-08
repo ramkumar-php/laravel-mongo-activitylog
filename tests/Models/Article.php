@@ -2,7 +2,7 @@
 
 namespace Spatie\Activitylog\Test\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Article extends Model
 {

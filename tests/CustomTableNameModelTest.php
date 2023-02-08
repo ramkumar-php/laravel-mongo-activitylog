@@ -3,13 +3,13 @@
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Test\Models\CustomTableNameOnActivityModel;
 
-it('uses the table name from the configuration', function () {
+it('uses the table name from the configuration', function (): void {
     $model = new Activity();
 
     expect(config('activitylog.table_name'))->toEqual($model->getTable());
 });
 
-it('uses a custom table name', function () {
+it('uses a custom table name', function (): void {
     $model = new Activity();
     $newTableName = 'my_personal_activities';
 
@@ -19,7 +19,7 @@ it('uses a custom table name', function () {
     expect($newTableName)->toEqual($model->getTable());
 });
 
-it('uses the table name from the model', function () {
+it('uses the table name from the model', function (): void {
     $model = new CustomTableNameOnActivityModel();
 
     $this->assertNotEquals($model->getTable(), config('activitylog.table_name'));

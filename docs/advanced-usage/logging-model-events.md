@@ -14,7 +14,7 @@ The attributes that need to be logged can be defined either by their name or you
 Here's an example:
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -108,7 +108,7 @@ $activity->changes; //returns ['attributes' => ['name' => 'updated name', 'text'
 By default the package will log the `created`, `updated`, `deleted` events. You can modify this behaviour by setting the `$recordEvents` property on a model.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class NewsItem extends Model
@@ -125,7 +125,7 @@ class NewsItem extends Model
 By default the package will log `created`, `updated`, `deleted` in the description of the activity. You can modify this text by providing callback to the `->setDescriptionForEvent()` method on `LogOptions` class.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -163,7 +163,7 @@ $activity->description; //returns 'This model has been created'
 Specify name by provide string to `->useLogName()` to make the model use another name than the default.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -184,7 +184,7 @@ class NewsItem extends Model
 If your model contains attributes whose change don't need to trigger an activity being logged you can use `->dontLogIfAttributesChangedOnly()`
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -212,7 +212,7 @@ By default the `updated_at` attribute is _not_ ignored and will trigger an activ
 If you do not want to log every attribute passed into `->logOnly()`, but only those that have actually changed after the update, you can call `->logOnlyDirty()`.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -238,7 +238,7 @@ Changing only `name` means only the `name` attribute will be logged in the activ
 If you would like to log an attribute of a directly related model, you may use dot notation to log an attribute of the model's relationship.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -266,7 +266,7 @@ class NewsItem extends Model
 If you would like to log only the changes to a specific JSON objects sub-keys. You can use the same method for logging specific columns with the difference of choosing the json key to log.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class NewsItem extends Model
@@ -348,7 +348,7 @@ The result in the log entry key for the attribute will be what is in the `->logO
 Calling `->dontSubmitEmptyLogs()` prevents the package from storing empty logs. Storing empty logs can happen when you only want to log a certain attribute but only another changes.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -374,7 +374,7 @@ class NewsItem extends Model
 If you use wildcard logging, but do not want to log certain attributes, you can specify those attributes by calling `->dontLogIfAttributesChangedOnly()`.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -451,7 +451,7 @@ $newsItem->update(['name' => 'The new name is logged']);
 In addition to the `tap()` method on `ActivityLogger` you can utilise the `tapActivity()` method in your observed model class. This method will allow you to fill properties and add custom fields before the activity is saved.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Contracts\Activity;
 

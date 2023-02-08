@@ -2,9 +2,9 @@
 
 namespace Spatie\Activitylog\Test\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Jenssegers\Mongodb\Eloquent\Builder;
+use Jenssegers\Mongodb\Eloquent\Model;
+use Jenssegers\Mongodb\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
@@ -51,9 +51,7 @@ class Activity extends Model implements ActivityContract
             return new Collection();
         }
 
-        return collect(array_filter($this->properties->toArray(), function ($key) {
-            return in_array($key, ['attributes', 'old']);
-        }, ARRAY_FILTER_USE_KEY));
+        return collect(array_filter($this->properties->toArray(), fn ($key) => in_array($key, ['attributes', 'old']), ARRAY_FILTER_USE_KEY));
     }
 
     public function scopeInLog(Builder $query, ...$logNames): Builder

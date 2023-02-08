@@ -13,8 +13,8 @@ use Spatie\Activitylog\Test\Models\Issue733;
 use Spatie\Activitylog\Test\Models\User;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-beforeEach(function () {
-    $this->article = new class() extends Article {
+beforeEach(function (): void {
+    $this->article = new class () extends Article {
         use LogsActivity;
         use SoftDeletes;
 
@@ -24,7 +24,7 @@ beforeEach(function () {
         }
     };
 
-    $this->user = new class() extends User {
+    $this->user = new class () extends User {
         use LogsActivity;
         use SoftDeletes;
 
@@ -37,7 +37,7 @@ beforeEach(function () {
     $this->assertCount(0, Activity::all());
 });
 
-it('will log the creation of the model', function () {
+it('will log the creation of the model', function (): void {
     $article = $this->createArticle();
     $this->assertCount(1, Activity::all());
 
@@ -47,7 +47,7 @@ it('will log the creation of the model', function () {
     $this->assertEquals('created', $this->getLastActivity()->event);
 });
 
-it('can skip logging model events if asked to', function () {
+it('can skip logging model events if asked to', function (): void {
     $article = new $this->article();
     $article->disableLogging();
     $article->name = 'my name';
@@ -58,7 +58,7 @@ it('can skip logging model events if asked to', function () {
     $this->assertNull($this->getLastActivity());
 });
 
-it('can switch on activity logging after disabling it', function () {
+it('can switch on activity logging after disabling it', function (): void {
     $article = new $this->article();
 
     $article->disableLogging();
@@ -76,7 +76,7 @@ it('can switch on activity logging after disabling it', function () {
     $this->assertEquals('updated', $this->getLastActivity()->event);
 });
 
-it('can skip logging if asked to for update method', function () {
+it('can skip logging if asked to for update method', function (): void {
     $article = new $this->article();
     $article->disableLogging()->update(['name' => 'How to log events']);
 
@@ -84,7 +84,7 @@ it('can skip logging if asked to for update method', function () {
     $this->assertNull($this->getLastActivity());
 });
 
-it('will log an update of the model', function () {
+it('will log an update of the model', function (): void {
     $article = $this->createArticle();
 
     $article->name = 'changed name';
@@ -98,7 +98,7 @@ it('will log an update of the model', function () {
     $this->assertEquals('updated', $this->getLastActivity()->event);
 });
 
-it('it will log the replication of a model with softdeletes', function () {
+it('it will log the replication of a model with softdeletes', function (): void {
     $article = $this->createArticle();
 
     $replicatedArticle = $this->article::find($article->id)->replicate();
@@ -117,8 +117,8 @@ it('it will log the replication of a model with softdeletes', function () {
     $this->assertEquals($replicatedArticle->id, $activityItems->last()->subject_id);
 });
 
-it('will log the deletion of a model without softdeletes', function () {
-    $articleClass = new class() extends Article {
+it('will log the deletion of a model without softdeletes', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
@@ -147,7 +147,7 @@ it('will log the deletion of a model without softdeletes', function () {
     $this->assertEquals('deleted', $activity->event);
 });
 
-it('will log the deletion of a model with softdeletes', function () {
+it('will log the deletion of a model with softdeletes', function (): void {
     $article = $this->createArticle();
 
     $article->delete();
@@ -168,7 +168,7 @@ it('will log the deletion of a model with softdeletes', function () {
     $this->assertNull($article->fresh());
 });
 
-it('will log the restoring of a model with softdeletes', function () {
+it('will log the restoring of a model with softdeletes', function (): void {
     $article = $this->createArticle();
 
     $article->delete();
@@ -183,7 +183,7 @@ it('will log the restoring of a model with softdeletes', function () {
     $this->assertEquals('restored', $this->getLastActivity()->event);
 });
 
-it('can fetch all activity for a model', function () {
+it('can fetch all activity for a model', function (): void {
     $article = $this->createArticle();
 
     $article->name = 'changed name';
@@ -194,7 +194,7 @@ it('can fetch all activity for a model', function () {
     $this->assertCount(2, $activities);
 });
 
-it('can fetch soft deleted models', function () {
+it('can fetch soft deleted models', function (): void {
     app()['config']->set('activitylog.subject_returns_soft_deleted_models', true);
 
     $article = $this->createArticle();
@@ -215,14 +215,14 @@ it('can fetch soft deleted models', function () {
     $this->assertEquals('changed name', $this->getLastActivity()->subject->name);
 });
 
-it('can log activity to log named in the model', function () {
-    $articleClass = new class() extends Article {
+it('can log activity to log named in the model', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->useLogName('custom_log');
+                ->useLogName('custom_log');
         }
     };
 
@@ -233,14 +233,14 @@ it('can log activity to log named in the model', function () {
     $this->assertSame('custom_log', Activity::latest()->first()->log_name);
 });
 
-it('will not log an update of the model if only ignored attributes are changed', function () {
-    $articleClass = new class() extends Article {
+it('will not log an update of the model if only ignored attributes are changed', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->dontLogIfAttributesChangedOnly(['text']);
+                ->dontLogIfAttributesChangedOnly(['text']);
         }
     };
 
@@ -259,15 +259,15 @@ it('will not log an update of the model if only ignored attributes are changed',
     $this->assertEquals('created', $this->getLastActivity()->event);
 });
 
-it('will not fail if asked to replace from empty attribute', function () {
-    $model = new class() extends Article {
+it('will not fail if asked to replace from empty attribute', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
         use SoftDeletes;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->setDescriptionForEvent(fn (string $eventName): string => ":causer.name $eventName");
+                ->setDescriptionForEvent(fn (string $eventName): string => ":causer.name {$eventName}");
         }
     };
 
@@ -285,7 +285,7 @@ it('will not fail if asked to replace from empty attribute', function () {
     $this->assertEquals(':causer.name updated', $activities[1]->description);
 });
 
-it('can log activity on subject by same causer', function () {
+it('can log activity on subject by same causer', function (): void {
     $user = $this->loginWithFakeUser();
 
     $user->name = 'LogsActivity Name';
@@ -300,8 +300,8 @@ it('can log activity on subject by same causer', function () {
     $this->assertCount(1, $user->actions);
 });
 
-it('can log activity when attributes are changed with tap', function () {
-    $model = new class() extends Article {
+it('can log activity when attributes are changed with tap', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
@@ -315,7 +315,7 @@ it('can log activity when attributes are changed with tap', function () {
             ],
         ];
 
-        public function tapActivity(Activity $activity, string $eventName)
+        public function tapActivity(Activity $activity, string $eventName): void
         {
             $properties = $this->properties;
             $properties['event'] = $eventName;
@@ -336,8 +336,8 @@ it('can log activity when attributes are changed with tap', function () {
     $this->assertEquals(Carbon::yesterday()->startOfDay()->format('Y-m-d H:i:s'), $firstActivity->created_at->format('Y-m-d H:i:s'));
 });
 
-it('can log activity when description is changed with tap', function () {
-    $model = new class() extends Article {
+it('can log activity when description is changed with tap', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
@@ -345,7 +345,7 @@ it('can log activity when description is changed with tap', function () {
             return LogOptions::defaults();
         }
 
-        public function tapActivity(Activity $activity, string $eventName)
+        public function tapActivity(Activity $activity, string $eventName): void
         {
             $activity->description = 'my custom description';
         }
@@ -359,8 +359,8 @@ it('can log activity when description is changed with tap', function () {
     $this->assertEquals('my custom description', $firstActivity->description);
 });
 
-it('can log activity when event is changed with tap', function () {
-    $model = new class() extends Article {
+it('can log activity when event is changed with tap', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
@@ -368,7 +368,7 @@ it('can log activity when event is changed with tap', function () {
             return LogOptions::defaults();
         }
 
-        public function tapActivity(Activity $activity, string $eventName)
+        public function tapActivity(Activity $activity, string $eventName): void
         {
             $activity->event = 'my custom event';
         }
@@ -382,16 +382,16 @@ it('can log activity when event is changed with tap', function () {
     $this->assertEquals('my custom event', $firstActivity->event);
 });
 
-it('will not submit log when there is no changes', function () {
-    $model = new class() extends Article {
+it('will not submit log when there is no changes', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
 
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['text'])
-            ->dontSubmitEmptyLogs()
-            ->logOnlyDirty();
+                ->logOnly(['text'])
+                ->dontSubmitEmptyLogs()
+                ->logOnlyDirty();
         }
     };
 
@@ -406,8 +406,8 @@ it('will not submit log when there is no changes', function () {
     $this->assertCount(1, Activity::all());
 });
 
-it('will submit a log with json changes', function () {
-    $model = new class() extends Article {
+it('will submit a log with json changes', function (): void {
+    $model = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -417,9 +417,9 @@ it('will submit a log with json changes', function () {
         public function getActivitylogOptions(): LogOptions
         {
             return LogOptions::defaults()
-            ->logOnly(['text', 'json->data'])
-            ->dontSubmitEmptyLogs()
-            ->logOnlyDirty();
+                ->logOnly(['text', 'json->data'])
+                ->dontSubmitEmptyLogs()
+                ->logOnlyDirty();
         }
     };
 
@@ -460,7 +460,7 @@ it('will submit a log with json changes', function () {
     $this->assertSame($expectedChanges, $changes);
 });
 
-it('will log the retrieval of the model', function () {
+it('will log the retrieval of the model', function (): void {
     $article = Issue733::create(['name' => 'my name']);
 
     $retrieved = Issue733::whereKey($article->getKey())->first();
@@ -473,8 +473,8 @@ it('will log the retrieval of the model', function () {
     $this->assertEquals('retrieved', $activity->description);
 });
 
-it('will not log casted attribute of the model if attribute raw values is used', function () {
-    $articleClass = new class() extends Article {
+it('will not log casted attribute of the model if attribute raw values is used', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -498,14 +498,14 @@ it('will not log casted attribute of the model if attribute raw values is used',
     $this->assertEquals('created', $this->getLastActivity()->event);
 });
 
-it('can be serialized', function () {
+it('can be serialized', function (): void {
     $model = ArticleWithLogDescriptionClosure::create(['name' => 'foo']);
 
     $this->assertNotNull(serialize($model));
 });
 
-it('logs non backed enum casted attribute', function () {
-    $articleClass = new class() extends Article {
+it('logs non backed enum casted attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -532,8 +532,8 @@ it('logs non backed enum casted attribute', function () {
     "PHP < 8.1 doesn't support enums && Laravel < 9.0 doesn't support non-backed-enum casting"
 );
 
-it('logs int backed enum casted attribute', function () {
-    $articleClass = new class() extends Article {
+it('logs int backed enum casted attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [
@@ -557,8 +557,8 @@ it('logs int backed enum casted attribute', function () {
     $this->assertEquals('created', $this->getLastActivity()->event);
 })->skip(version_compare(PHP_VERSION, '8.1', '<'), "PHP < 8.1 doesn't support enum");
 
-it('logs string backed enum casted attribute', function () {
-    $articleClass = new class() extends Article {
+it('logs string backed enum casted attribute', function (): void {
+    $articleClass = new class () extends Article {
         use LogsActivity;
 
         protected $casts = [

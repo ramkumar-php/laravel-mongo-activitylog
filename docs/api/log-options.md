@@ -8,7 +8,7 @@ Customization of how your models will be logged is controlled when implementing 
 The most basic example of an Activity logged model would be:
 
 ```php
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 

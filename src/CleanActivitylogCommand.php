@@ -5,7 +5,7 @@ namespace Spatie\Activitylog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
-use Illuminate\Database\Eloquent\Builder;
+use Jenssegers\Mongodb\Eloquent\Builder;
 
 class CleanActivitylogCommand extends Command
 {
@@ -36,7 +36,7 @@ class CleanActivitylogCommand extends Command
 
         $amountDeleted = $activity::query()
             ->where('created_at', '<', $cutOffDate)
-            ->when($log !== null, function (Builder $query) use ($log) {
+            ->when($log !== null, function (Builder $query) use ($log): void {
                 $query->inLog($log);
             })
             ->delete();

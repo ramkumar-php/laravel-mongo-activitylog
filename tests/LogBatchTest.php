@@ -3,7 +3,7 @@
 use Spatie\Activitylog\Facades\LogBatch;
 use Illuminate\Support\Str;
 
-it('generates uuid after start and end batch properely', function () {
+it('generates uuid after start and end batch properely', function (): void {
     LogBatch::startBatch();
     $uuid = LogBatch::getUuid();
     LogBatch::endBatch();
@@ -13,7 +13,7 @@ it('generates uuid after start and end batch properely', function () {
     expect($uuid)->toBeString();
 });
 
-it('returns null uuid after end batch properely', function () {
+it('returns null uuid after end batch properely', function (): void {
     LogBatch::startBatch();
     $uuid = LogBatch::getUuid();
     LogBatch::endBatch();
@@ -23,7 +23,7 @@ it('returns null uuid after end batch properely', function () {
     expect(LogBatch::getUuid())->toBeNull();
 });
 
-it('generates a new uuid after starting new batch properly', function () {
+it('generates a new uuid after starting new batch properly', function (): void {
     LogBatch::startBatch();
     $firstBatchUuid = LogBatch::getUuid();
     LogBatch::endBatch();
@@ -41,7 +41,7 @@ it('generates a new uuid after starting new batch properly', function () {
     $this->assertNotEquals($firstBatchUuid, $secondBatchUuid);
 });
 
-it('will not generate new uuid if start already started batch', function () {
+it('will not generate new uuid if start already started batch', function (): void {
     LogBatch::startBatch();
 
     $firstUuid = LogBatch::getUuid();
@@ -57,7 +57,7 @@ it('will not generate new uuid if start already started batch', function () {
     expect($secondUuid)->toEqual($firstUuid);
 });
 
-it('will not generate uuid if end batch before starting', function () {
+it('will not generate uuid if end batch before starting', function (): void {
     LogBatch::endBatch();
     $uuid = LogBatch::getUuid();
 
@@ -66,7 +66,7 @@ it('will not generate uuid if end batch before starting', function () {
     expect($uuid)->toBeNull();
 });
 
-it('can set uuid and start a batch', function () {
+it('can set uuid and start a batch', function (): void {
     $uuid = Str::uuid();
 
     LogBatch::setBatch($uuid);
@@ -77,7 +77,7 @@ it('can set uuid and start a batch', function () {
     expect(LogBatch::isOpen())->toBeFalse();
 });
 
-it('can set uuid for already started batch', function () {
+it('can set uuid for already started batch', function (): void {
     $uuid = Str::uuid();
 
     LogBatch::startBatch();
@@ -92,7 +92,7 @@ it('can set uuid for already started batch', function () {
     expect(LogBatch::isOpen())->toBeFalse();
 });
 
-it('will not return null uuid if end batch that started twice', function () {
+it('will not return null uuid if end batch that started twice', function (): void {
     LogBatch::startBatch();
     $firstUuid = LogBatch::getUuid();
 
@@ -108,7 +108,7 @@ it('will not return null uuid if end batch that started twice', function () {
     expect($notNullUuid)->toBe($firstUuid);
 });
 
-it('will return null uuid if end batch that started twice properly', function () {
+it('will return null uuid if end batch that started twice properly', function (): void {
     LogBatch::startBatch();
     $firstUuid = LogBatch::getUuid();
 

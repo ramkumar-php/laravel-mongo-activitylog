@@ -5,14 +5,14 @@ use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Test\Models\Article;
 use Spatie\Activitylog\Test\Models\User;
 
-beforeEach(function () {
-    collect(range(1, 5))->each(function (int $index) {
+beforeEach(function (): void {
+    collect(range(1, 5))->each(function (int $index): void {
         $logName = "log{$index}";
         activity($logName)->log('hello everybody');
     });
 });
 
-it('provides a scope to get activities from a specific log', function () {
+it('provides a scope to get activities from a specific log', function (): void {
     $activityInLog3 = Activity::inLog('log3')->get();
 
     expect($activityInLog3)->toHaveCount(1);
@@ -20,7 +20,7 @@ it('provides a scope to get activities from a specific log', function () {
     expect($activityInLog3->first()->log_name)->toEqual('log3');
 });
 
-it('provides a scope to get log items from multiple logs', function () {
+it('provides a scope to get log items from multiple logs', function (): void {
     $activity = Activity::inLog('log2', 'log4')->get();
 
     expect($activity)->toHaveCount(2);
@@ -29,7 +29,7 @@ it('provides a scope to get log items from multiple logs', function () {
     expect($activity->last()->log_name)->toEqual('log4');
 });
 
-it('provides a scope to get log items from multiple logs using an array', function () {
+it('provides a scope to get log items from multiple logs using an array', function (): void {
     $activity = Activity::inLog(['log1', 'log2'])->get();
 
     expect($activity)->toHaveCount(2);
@@ -38,7 +38,7 @@ it('provides a scope to get log items from multiple logs using an array', functi
     expect($activity->last()->log_name)->toEqual('log2');
 });
 
-it('provides a scope to get log items for a specific causer', function () {
+it('provides a scope to get log items for a specific causer', function (): void {
     $subject = Article::first();
     $causer = User::first();
 
@@ -55,7 +55,7 @@ it('provides a scope to get log items for a specific causer', function () {
     expect($activities->first()->description)->toEqual('Foo');
 });
 
-it('provides a scope to get log items for a specific event', function () {
+it('provides a scope to get log items for a specific event', function (): void {
     $subject = Article::first();
     activity()
         ->on($subject)
@@ -66,7 +66,7 @@ it('provides a scope to get log items for a specific event', function () {
     expect($activities->first()->event)->toEqual('create');
 });
 
-it('provides a scope to get log items for a specific subject', function () {
+it('provides a scope to get log items for a specific subject', function (): void {
     $subject = Article::first();
     $causer = User::first();
 
@@ -83,7 +83,7 @@ it('provides a scope to get log items for a specific subject', function () {
     expect($activities->first()->description)->toEqual('Foo');
 });
 
-it('provides a scope to get log items for a specific morphmapped causer', function () {
+it('provides a scope to get log items for a specific morphmapped causer', function (): void {
     Relation::morphMap([
         'articles' => 'Spatie\Activitylog\Test\Models\Article',
         'users' => 'Spatie\Activitylog\Test\Models\User',
@@ -107,7 +107,7 @@ it('provides a scope to get log items for a specific morphmapped causer', functi
     Relation::morphMap([], false);
 });
 
-it('provides a scope to get log items for a specific morphmapped subject', function () {
+it('provides a scope to get log items for a specific morphmapped subject', function (): void {
     Relation::morphMap([
         'articles' => 'Spatie\Activitylog\Test\Models\Article',
         'users' => 'Spatie\Activitylog\Test\Models\User',

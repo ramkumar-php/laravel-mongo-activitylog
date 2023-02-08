@@ -30,7 +30,7 @@ abstract class TestCase extends OrchestraTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
         config()->set('activitylog.database_connection', 'sqlite');
         config()->set('database.default', 'sqlite');
@@ -45,7 +45,7 @@ abstract class TestCase extends OrchestraTestCase
         ));
     }
 
-    protected function setUpDatabase()
+    protected function setUpDatabase(): void
     {
         $this->migrateActivityLogTable();
 
@@ -53,7 +53,7 @@ abstract class TestCase extends OrchestraTestCase
         $this->seedModels(Article::class, User::class);
     }
 
-    protected function migrateActivityLogTable()
+    protected function migrateActivityLogTable(): void
     {
         require_once __DIR__.'/../database/migrations/create_activity_log_table.php.stub';
         require_once __DIR__.'/../database/migrations/add_event_column_to_activity_log_table.php.stub';
@@ -64,10 +64,10 @@ abstract class TestCase extends OrchestraTestCase
         (new AddBatchUuidColumnToActivityLogTable())->up();
     }
 
-    protected function createTables(...$tableNames)
+    protected function createTables(...$tableNames): void
     {
-        collect($tableNames)->each(function (string $tableName) {
-            Schema::create($tableName, function (Blueprint $table) use ($tableName) {
+        collect($tableNames)->each(function (string $tableName): void {
+            Schema::create($tableName, function (Blueprint $table) use ($tableName): void {
                 $table->increments('id');
                 $table->string('name')->nullable();
                 $table->string('text')->nullable();
@@ -86,9 +86,9 @@ abstract class TestCase extends OrchestraTestCase
         });
     }
 
-    protected function seedModels(...$modelClasses)
+    protected function seedModels(...$modelClasses): void
     {
-        collect($modelClasses)->each(function (string $modelClass) {
+        collect($modelClasses)->each(function (string $modelClass): void {
             foreach (range(1, 0) as $index) {
                 $modelClass::create(['name' => "name {$index}"]);
             }

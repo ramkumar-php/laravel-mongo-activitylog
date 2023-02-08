@@ -4,7 +4,7 @@ namespace Spatie\Activitylog\Traits;
 
 use Carbon\CarbonInterval;
 use DateInterval;
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pipeline\Pipeline;
@@ -17,6 +17,7 @@ use Spatie\Activitylog\ActivityLogStatus;
 use Spatie\Activitylog\Contracts\LoggablePipe;
 use Spatie\Activitylog\EventLogBag;
 use Spatie\Activitylog\LogOptions;
+use BackedEnum;
 
 trait LogsActivity
 {
@@ -36,15 +37,15 @@ trait LogsActivity
         // checking for "updated" event hook explicitly to temporary hold original
         // attributes on the model as we'll need them later to compare against.
 
-        static::eventsToBeRecorded()->each(function ($eventName) {
+        static::eventsToBeRecorded()->each(function ($eventName): void {
             if ($eventName === 'updated') {
-                static::updating(function (Model $model) {
+                static::updating(function (Model $model): void {
                     $oldValues = (new static())->setRawAttributes($model->getRawOriginal());
                     $model->oldAttributes = static::logChanges($oldValues);
                 });
             }
 
-            static::$eventName(function (Model $model) use ($eventName) {
+            static::$eventName(function (Model $model) use ($eventName): void {
                 $model->activitylogOptions = $model->getActivitylogOptions();
 
                 if (! $model->shouldLogEvent($eventName)) {
@@ -58,7 +59,7 @@ trait LogsActivity
                 $logName = $model->getLogNameToUse();
 
                 // Submitting empty description will cause place holder replacer to fail.
-                if ($description == '') {
+                if ($description === '') {
                     return;
                 }
 
@@ -211,7 +212,6 @@ trait LogsActivity
 
         // Determine if unguarded attributes will be logged.
         if ($this->shouldLogUnguarded()) {
-
             // Get only attribute names, not intrested in the values here then guarded
             // attributes. get only keys than not present in guarded array, because
             // we are logging the unguarded attributes and we cant have both!
@@ -220,7 +220,6 @@ trait LogsActivity
         }
 
         if (! empty($this->activitylogOptions->logAttributes)) {
-
             // Filter * from the logAttributes because will deal with it separately
             $attributes = array_merge($attributes, array_diff($this->activitylogOptions->logAttributes, ['*']));
 
@@ -231,7 +230,6 @@ trait LogsActivity
         }
 
         if ($this->activitylogOptions->logExceptAttributes) {
-
             // Filter out the attributes defined in ignoredAttributes out of the local array
             $attributes = array_diff($attributes, $this->activitylogOptions->logExceptAttributes);
         }
@@ -247,11 +245,11 @@ trait LogsActivity
 
         // This case means all of the attributes are guarded
         // so we'll not have any unguarded anyway.
-        if (in_array('*', $this->getGuarded())) {
-            return false;
-        }
+        return ! (in_array('*', $this->getGuarded()))
 
-        return true;
+
+
+         ;
     }
 
     /**
@@ -269,7 +267,7 @@ trait LogsActivity
             // if the current event is retrieved, get the model itself
             // else get the fresh default properties from database
             // as wouldn't be part of the saved model instance.
-            $processingEvent == 'retrieved'
+            $processingEvent === 'retrieved'
                 ? $this
                 : (
                     $this->exists
@@ -278,8 +276,7 @@ trait LogsActivity
                 )
         );
 
-        if (static::eventsToBeRecorded()->contains('updated') && $processingEvent == 'updated') {
-
+        if (static::eventsToBeRecorded()->contains('updated') && $processingEvent === 'updated') {
             // Fill the attributes with null values.
             $nullProperties = array_fill_keys(array_keys($properties['attributes']), null);
 
@@ -291,7 +288,6 @@ trait LogsActivity
         }
 
         if ($this->activitylogOptions->logOnlyDirty && isset($properties['old'])) {
-
             // Get difference between the old and new attributes.
             $properties['attributes'] = array_udiff_assoc(
                 $properties['attributes'],
@@ -319,7 +315,7 @@ trait LogsActivity
                 ->all();
         }
 
-        if (static::eventsToBeRecorded()->contains('deleted') && $processingEvent == 'deleted') {
+        if (static::eventsToBeRecorded()->contains('deleted') && $processingEvent === 'deleted') {
             $properties['old'] = $properties['attributes'];
             unset($properties['attributes']);
         }
@@ -353,7 +349,7 @@ trait LogsActivity
                 ? $model->getAttributeFromArray($attribute)
                 : $model->getAttribute($attribute);
 
-            if (is_null($changes[$attribute])) {
+            if (null === $changes[$attribute]) {
                 continue;
             }
 
@@ -371,7 +367,7 @@ trait LogsActivity
                         $changes[$attribute] = $model->getStorableEnumValue($changes[$attribute]);
                     } else {
                         // ToDo: DEPRECATED - only here for Laravel 8 support
-                        $changes[$attribute] = $changes[$attribute] instanceof \BackedEnum
+                        $changes[$attribute] = $changes[$attribute] instanceof BackedEnum
                             ? $changes[$attribute]->value
                             : $changes[$attribute]->name;
                     }
@@ -411,9 +407,7 @@ trait LogsActivity
             $relation,
             Str::snake($relation),
             Str::camel($relation),
-        ], function (string $method) use ($model): bool {
-            return method_exists($model, $method);
-        }, $relation);
+        ], fn (string $method): bool => method_exists($model, $method), $relation);
     }
 
     protected static function getModelAttributeJsonValue(Model $model, string $attribute): mixed

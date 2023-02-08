@@ -3,13 +3,13 @@
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Test\Models\CustomDatabaseConnectionOnActivityModel;
 
-it('uses the database connection from the configuration', function () {
+it('uses the database connection from the configuration', function (): void {
     $model = new Activity();
 
     expect(config('activitylog.database_connection'))->toEqual($model->getConnectionName());
 });
 
-it('uses a custom database connection', function () {
+it('uses a custom database connection', function (): void {
     $model = new Activity();
 
     $model->setConnection('custom_sqlite');
@@ -18,7 +18,7 @@ it('uses a custom database connection', function () {
     expect('custom_sqlite')->toEqual($model->getConnectionName());
 });
 
-it('uses the default database connection when the one from configuration is null', function () {
+it('uses the default database connection when the one from configuration is null', function (): void {
     app()['config']->set('activitylog.database_connection', null);
 
     $model = new Activity();
@@ -26,7 +26,7 @@ it('uses the default database connection when the one from configuration is null
     expect($model->getConnection())->toBeInstanceOf('Illuminate\Database\SQLiteConnection');
 });
 
-it('uses the database connection from model', function () {
+it('uses the database connection from model', function (): void {
     $model = new CustomDatabaseConnectionOnActivityModel();
 
     $this->assertNotEquals($model->getConnectionName(), config('activitylog.database_connection'));
