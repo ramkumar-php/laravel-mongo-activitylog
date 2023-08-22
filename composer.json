@@ -35,7 +35,8 @@
         "illuminate/config": "^8.0 || ^9.0 || ^10.0",
         "illuminate/database": "^8.69 || ^9.27 || ^10.0",
         "illuminate/support": "^8.0 || ^9.0 || ^10.0",
-        "spatie/laravel-package-tools": "^1.6.3"
+        "spatie/laravel-package-tools": "^1.6.3",
+        "jenssegers/mongodb": "^3.9"
     },
     "require-dev": {
         "ext-json": "*",
